@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100vh;
+            background-image: url(register.jpg);
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+
+        }
+
+
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="signup-container">
+    <label for="fullname">Full Name:</label>
+    <input type="text" id="fullname" name="fullname" placeholder="Fullname" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" placeholder="abc123@medi.com" required>
+
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" placeholder="Username" required>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" placeholder="**********" required>
+
+    <label for="phoneNumber">Phone Number:</label>
+    <input type="tel" id="phoneNumber" name="phoneNumber" pattern="[0-9]{10}" placeholder="9876543210" required>
+
+    <label for="aadharNumber">Aadhar Number:</label>
+    <input type="text" id="aadharNumber" name="aadharNumber" pattern="[0-9]{12}" required>
+
+    <label for="address">Address:</label>
+    <textarea id="address" name="address" required></textarea>
+
+    <label for="bloodGroup">Blood Group:</label>
+    <select id="bloodGroup" name="bloodGroup" required>
+        <option value="" disabled selected></option>
+        <option value="A+">A+</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B-">B-</option>
+        <option value="O+">O+</option>
+        <option value="O-">O-</option>
+        <option value="AB+">AB+</option>
+        <option value="AB-">AB-</option>
+    </select>
+
+    <label for="Gender">Gender:</label>
+    <select id="Gender" name="Gender" required>
+        <option value="" disabled selected></option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <label for="dob">Date of Birth:</label>
+    <input type="date" id="dob" name="dob" required>
+
+    <button type="submit" id="signup" name="signup" value="Sign Up">Sign Up</button>
+    </div>
+
+</body>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, set, ref } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA-iYhHTfPwfpaODBWwWdRzfz3bO9boajQ",
+        authDomain: "blood-bank-1e17b.firebaseapp.com",
+        databaseURL: "https://blood-bank-1e17b-default-rtdb.firebaseio.com",
+        projectId: "blood-bank-1e17b",
+        storageBucket: "blood-bank-1e17b.appspot.com",
+        messagingSenderId: "602289949493",
+        appId: "1:602289949493:web:d389c1e916f837e743da7c"
+    };
+
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+
+    signup.addEventListener('click', (e) => {
+        var fullname = document.getElementById('fullname').value;
+        var email = document.getElementById('email').value;
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+        var phoneNumber = document.getElementById('phoneNumber').value;
+        var aadharNumber = document.getElementById('aadharNumber').value;
+        var address = document.getElementById('address').value;
+        var Gender = document.getElementById('Gender').value;
+        var bloodGroup = document.getElementById('bloodGroup').value;
+        var dob = document.getElementById('dob').value;
+        
+
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                set(ref(database, 'user/' + user.uid),
+                    {
+                        email: email,
+                        fullname: fullname,
+                        username: username,
+                        phoneNumber: phoneNumber,
+                        aadharNumber: aadharNumber,
+                        address: address,
+                        Gender: Gender,
+                        bloodGroup: bloodGroup,
+                        dob: dob
+                    })
+                alert('Account Created Succesfully !!!')
+            })
+            .catch((error) => {
+                alert('Account not Created !!!')
+            });
+    })
+</script>
+
+</html>

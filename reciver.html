@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receiver Registration Form</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        form {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            margin: 20px;
+            box-sizing: border-box;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group input {
+            flex: 1;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="signup-container">
+        <form id="receiverForm">
+            <label for="fullname">Full Name:</label>
+            <input type="text" id="fullname" name="fullname" placeholder="Fullname" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="abc123@medi.com" required>
+
+            <label for="phoneNumber">Phone Number:</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" pattern="[0-9]{10}" placeholder="9876543210" required>
+
+            <label for="bloodGroup">Blood Group:</label>
+            <select id="bloodGroup" name="bloodGroup" required>
+                <option value="" disabled selected></option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+            </select>
+
+            <div class="form-group">
+                <input type="text" id="Location" name="Location" placeholder="Location" required>
+                <button type="button" onclick="getLocation()">Get Location</button>
+            </div>
+
+            <button type="button" id="submit" name="submit" value="submit">Submit</button>
+        </form>
+
+        <div id="donorList"></div> <!-- This will display the nearby donors -->
+    </div>
+    <script src="data.js"></script>
+    <script>
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAQKQe9epurco27WvQQ7-ntVoYM6Ek4YuY",
+            authDomain: "donors-5ef90.firebaseapp.com",
+            projectId: "donors-5ef90",
+            storageBucket: "donors-5ef90.appspot.com",
+            messagingSenderId: "942614272898",
+            appId: "1:942614272898:web:8af58b78f197002b26cd9b",
+            measurementId: "G-VGRZPHFE19"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Function to get the current location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    document.getElementById('Location').value = position.coords.latitude + ", " + position.coords.longitude;
+                }, function () {
+                    alert('Geolocation is not supported by this browser.');
+                });
+            }
+        }
+
+        // Function to calculate distance between two lat/lng points (Haversine formula)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius of the earth in km
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const d = R * c; // Distance in km
+            return d;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI / 180);
+        }
+
+        // Function to handle form submission
+        document.getElementById('submit').addEventListener('click', (e) => {
+            e.preventDefault();
+
+            var fullname = document.getElementById('fullname').value;
+            var email = document.getElementById('email').value;
+            var phoneNumber = document.getElementById('phoneNumber').value;
+            var bloodGroup = document.getElementById('bloodGroup').value;
+            var Location = document.getElementById('Location').value.split(', ');
+            var receiverLat = parseFloat(Location[0]);
+            var receiverLon = parseFloat(Location[1]);
+
+            // Fetch donor data and calculate distances
+            const dbRef = ref(database);
+            get(child(dbRef, `user/`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const donors = snapshot.val();
+                    const nearbyDonors = [];
+
+                    for (const donorId in donors) {
+                        const donor = donors[donorId];
+                        const donorLocation = donor.Location.split(', ');
+                        const donorLat = parseFloat(donorLocation[0]);
+                        const donorLon = parseFloat(donorLocation[1]);
+
+                        const distance = calculateDistance(receiverLat, receiverLon, donorLat, donorLon);
+
+                        if (distance <= 10) { // Radius in km
+                            nearbyDonors.push({
+                                fullname: donor.fullname,
+                                email: donor.email,
+                                phoneNumber: donor.phoneNumber,
+                                bloodGroup: donor.bloodGroup,
+                                distance: distance.toFixed(2)
+                            });
+                        }
+                    }
+
+                    // Display the list of nearby donors
+                    const donorList = document.getElementById('donorList');
+                    donorList.innerHTML = '<h3>Nearby Donors:</h3>';
+                    if (nearbyDonors.length > 0) {
+                        nearbyDonors.forEach(donor => {
+                            donorList.innerHTML += `<p>Name: ${donor.fullname}, Blood Group: ${donor.bloodGroup}, Distance: ${donor.distance} km</p>`;
+                        });
+                    } else {
+                        donorList.innerHTML += '<p>No nearby donors found.</p>';
+                    }
+                } else {
+                    console.log("No data available");
+                }
+            }).catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+        });
+
+    </script>
+</body>
+
+</html>

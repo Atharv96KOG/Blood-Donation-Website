@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('background.jpg'); /* Add a background image */
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        form {
+            background-color: rgba(255, 255, 255, 0.9); /* Slight transparency */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            margin: 20px;
+            box-sizing: border-box;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 8px;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group input {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 480px) {
+            form {
+                padding: 20px;
+                border-radius: 10px;
+                width: 90%;
+            }
+
+            input,
+            select {
+                margin-bottom: 15px;
+                padding: 8px;
+            }
+
+            button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .form-group input {
+                margin-right: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="signup-container">
+        <form>
+            <label for="fullname">Full Name:</label>
+            <input type="text" id="fullname" name="fullname" placeholder="Fullname" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="abc123@medi.com" required>
+
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="**********" required>
+
+            <label for="phoneNumber">Phone Number:</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" pattern="[0-9]{10}" placeholder="9876543210" required>
+
+            <label for="aadharNumber">Aadhar Number:</label>
+            <input type="text" id="aadharNumber" name="aadharNumber" pattern="[0-9]{12}" required>
+
+            <label for="bloodGroup">Blood Group:</label>
+            <select id="bloodGroup" name="bloodGroup" required>
+                <option value="" disabled selected></option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+            </select>
+
+            <label for="Gender">Gender:</label>
+            <select id="Gender" name="Gender" required>
+                <option value="" disabled selected></option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" name="dob" required>
+
+            <div class="form-group">
+                <input type="text" id="Location" name="Location" placeholder="Location" required>
+                <button type="button" onclick="getLocation()">Get Location</button>
+            </div>
+
+            <button type="button" id="submit" name="submit" value="submit">Submit</button>
+        </form>
+    </div>
+
+    <script src="data.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, set, ref } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAQKQe9epurco27WvQQ7-ntVoYM6Ek4YuY",
+            authDomain: "donors-5ef90.firebaseapp.com",
+            projectId: "donors-5ef90",
+            storageBucket: "donors-5ef90.appspot.com",
+            messagingSenderId: "942614272898",
+            appId: "1:942614272898:web:8af58b78f197002b26cd9b",
+            measurementId: "G-VGRZPHFE19"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth();
+
+        document.getElementById('submit').addEventListener('click', (e) => {
+            e.preventDefault();
+            var fullname = document.getElementById('fullname').value;
+            var email = document.getElementById('email').value;
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            var phoneNumber = document.getElementById('phoneNumber').value;
+            var aadharNumber = document.getElementById('aadharNumber').value;
+            var Location = document.getElementById('Location').value;
+            var Gender = document.getElementById('Gender').value;
+            var bloodGroup = document.getElementById('bloodGroup').value;
+            var dob = document.getElementById('dob').value;
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    set(ref(database, 'user/' + user.uid), {
+                        email: email,
+                        fullname: fullname,
+                        username: username,
+                        phoneNumber: phoneNumber,
+                        aadharNumber: aadharNumber,
+                        Location: Location,
+                        Gender: Gender,
+                        bloodGroup: bloodGroup,
+                        dob: dob
+                    })
+                    .then(() => {
+                        alert('Account Created Successfully !!!');
+                    })
+                    .catch((error) => {
+                        console.error('Database write failed:', error);
+                        alert('Account Created, but failed to save additional data.');
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error creating user:', error);
+                    alert('Account not Created !!!');
+                });
+        });
+    </script>
+</body>
+</html>
